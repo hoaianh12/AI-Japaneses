@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>発音チェック</title>
+  </head>
+  <body>
+    <h2>読んでください:</h2>
+    <p id="sentence"></p>
+    <button onclick="startRecording()">🎤 Ghi âm</button>
+    <button onclick="stopRecording()">🛑 Dừng</button>
+    <audio id="audioPlayback" controls></audio>
+
+    <script>
+      let sentence = "";
+      let mediaRecorder,
+        audioChunks = [];
+
+      // Gọi API lấy câu
+      fetch("/sentence")
+        .then((res) => res.json())
+        .then((data) => {
+          sentence = data.sentence;
+          document.getElementById("sentence").innerText = sentence;
+        });
+
+      async function startRecording() {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+      }
+
+      function stopRecording() {
+        mediaRecorder.stop();
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          document.getElementById("audioPlayback").src = audioUrl;
+
+          const formData = new FormData();
+          formData.append("audio", audioBlob);
+          formData.append("original", sentence);
+
+          fetch("/compare", { method: "POST", body: formData })
+            .then((res) => res.json())
+            .then((data) => alert("Kết quả: " + data.result));
+        };
+      }
+    </script>
+  </body>
+</html>
