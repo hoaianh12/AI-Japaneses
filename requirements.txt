@@ -1,0 +1,8 @@
+flask
+whisper
+torch
+numpy
+librosa
+soundfile
+difflib
+
