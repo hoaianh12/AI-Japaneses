@@ -6,7 +6,7 @@ import whisper
 import difflib
 
 # Step 1: Pick a random sentence
-def get_japanese_sentence(file="data/sentences.txt"):
+def get_japanese_sentence(file="data/sentences.txt"):g
     with open(file, encoding="utf-8") as f:
         return random.choice(f.readlines()).strip()
 
